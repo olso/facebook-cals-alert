@@ -1,5 +1,5 @@
-const r2 = require('r2')
 const { ICalParser } = require('cozy-ical')
+const nodeFetch = require('node-fetch')
 
 async function parseIcsData(icsData) {
   const parser = new ICalParser()
@@ -15,13 +15,18 @@ async function parseIcsData(icsData) {
   })
 }
 
+async function fetch(url) {
+  return nodeFetch(url).then(res => res.text())
+}
+
 /**
  * @param {string} icsCalendarUrl
  * @param {string} trigger
  * @returns {buffer}
  */
 module.exports = async (icsCalendarUrl = '', trigger = '-P1H') => {
-  const icsData = await r2(icsCalendarUrl).text
+
+  const icsData = await fetch(icsCalendarUrl)
   const calendar = await parseIcsData(icsData)
 
   calendar.subComponents.forEach((event) => {
