@@ -1,3 +1,7 @@
+#StdLib
+.stdlib
+stdlib-workspace/olso/pKey.json
+
 # Logs
 logs
 *.log
