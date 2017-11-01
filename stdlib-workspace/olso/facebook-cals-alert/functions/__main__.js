@@ -30,7 +30,11 @@ module.exports = async (icsCalendarUrl = '', trigger = '-PT1H') => {
   const calendar = await parseIcsData(icsData)
 
   calendar.subComponents.forEach((event) => {
+    event.addRawField('BEGIN', 'VALARM')
     event.addRawField('TRIGGER', trigger)
+    event.addRawField('DESCRIPTION', 'FB Event alert')
+    event.addRawField('ACTION', 'DISPLAY')
+    event.addRawField('END', 'VALARM')
   })
 
   return new Buffer(calendar.toString(), {
