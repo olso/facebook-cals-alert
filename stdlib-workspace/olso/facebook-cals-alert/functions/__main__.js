@@ -31,7 +31,10 @@ module.exports = async (icsCalendarUrl = '', trigger = '-P1H') => {
 
   calendar.subComponents.forEach((event) => {
     event.addRawField('BEGIN', 'VALARM')
-    event.addRawField('TRIGGER', trigger)
+    // event.addRawField('TRIGGER', trigger)
+    event.addRawField('TRIGGER', '-PT24H')
+    event.addRawField('REPEAT', '1')
+    event.addRawField('DURATION', 'PT15M')
     event.addRawField('DESCRIPTION', 'FB Event alert')
     event.addRawField('ACTION', 'DISPLAY')
     event.addRawField('END', 'VALARM')
