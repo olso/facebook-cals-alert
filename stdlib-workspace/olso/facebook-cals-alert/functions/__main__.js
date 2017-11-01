@@ -24,7 +24,7 @@ async function fetch(url) {
  * @param {string} trigger
  * @returns {buffer}
  */
-module.exports = async (icsCalendarUrl = '', trigger = '-PT1H') => {
+module.exports = async (icsCalendarUrl = '', trigger = '-P1H') => {
 
   const icsData = await fetch(icsCalendarUrl)
   const calendar = await parseIcsData(icsData)
