@@ -21,20 +21,18 @@ async function fetch(url) {
 
 /**
  * @param {string} icsCalendarUrl
- * @param {string} trigger
  * @returns {buffer}
  */
-module.exports = async (icsCalendarUrl = '', trigger = '-P1H') => {
+module.exports = async (icsCalendarUrl = '') => {
 
   const icsData = await fetch(icsCalendarUrl)
   const calendar = await parseIcsData(icsData)
 
   calendar.subComponents.forEach((event) => {
     event.addRawField('BEGIN', 'VALARM')
-    // event.addRawField('TRIGGER', trigger)
-    event.addRawField('TRIGGER', '-PT24H')
+    event.addRawField('TRIGGER', '-PT1H')
     event.addRawField('REPEAT', '1')
-    event.addRawField('DURATION', 'PT15M')
+    event.addRawField('DURATION', '-PT15M')
     event.addRawField('DESCRIPTION', 'FB Event alert')
     event.addRawField('ACTION', 'DISPLAY')
     event.addRawField('END', 'VALARM')
