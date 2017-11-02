@@ -1,12 +1,13 @@
 {
   "name": "facebook-cals-alert",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "",
   "author": "olso <olsansky.martin@gmail.com>",
   "main": "functions/__main__.js",
   "dependencies": {
     "cozy-ical": "^1.1.22",
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^1.7.3",
+    "uuid": "^3.1.0"
   },
   "private": true,
   "stdlib": {

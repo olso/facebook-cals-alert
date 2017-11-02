@@ -1,5 +1,6 @@
 const { ICalParser } = require('cozy-ical')
 const nodeFetch = require('node-fetch')
+const uuid = rrequire('uuid/v4')
 
 async function parseIcsData(icsData) {
   const parser = new ICalParser()
@@ -19,15 +20,21 @@ async function fetch(url) {
   return nodeFetch(url).then(res => res.text())
 }
 
-const VALARM = [
-  {k: 'BEGIN', v: 'VALARM'},
-  {k: 'TRIGGER', v: '-PT30M'},
-  {k: 'REPEAT', v: '1'},
-  {k: 'DURATION', v: 'PT15M'},
-  {k: 'DESCRIPTION', v: 'FB Event Alert'},
-  {k: 'ACTION', v: 'DISPLAY'},
-  {k: 'END', v: 'VALARM'}
-]
+function getVALARM() {
+  const id = uuid()
+
+  return [
+    {k: 'BEGIN', v: 'VALARM'},
+    {k: 'TRIGGER', v: '-PT30M'},
+    {k: 'REPEAT', v: '1'},
+    {k: 'DURATION', v: 'PT15M'},
+    {k: 'DESCRIPTION', v: 'FB Event Alert'},
+    {k: 'ACTION', v: 'DISPLAY'},
+    {k: 'UID', v: id},
+    {k: 'X-WR-ALARMUID', v: id},
+    {k: 'END', v: 'VALARM'}
+  ]
+}
 
 /**
  * https://tools.ietf.org/html/rfc5545
@@ -41,7 +48,7 @@ module.exports = async (icsCalendarUrl = '') => {
   const calendar = await parseIcsData(icsData)
 
   calendar.subComponents.forEach((event) => {
-    VALARM.forEach(({k, v} = field) => {
+    getVALARM().forEach(({k, v} = field) => {
       event.addRawField(k, v)
     })
   })
