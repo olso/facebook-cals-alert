@@ -1,6 +1,6 @@
 const { ICalParser } = require('cozy-ical')
 const nodeFetch = require('node-fetch')
-const uuid = rrequire('uuid/v4')
+const uuid = require('uuid/v4')
 
 async function parseIcsData(icsData) {
   const parser = new ICalParser()
