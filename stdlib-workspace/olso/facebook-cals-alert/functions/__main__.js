@@ -19,7 +19,19 @@ async function fetch(url) {
   return nodeFetch(url).then(res => res.text())
 }
 
+const VALARM = [
+  {k: 'BEGIN', v: 'VALARM'},
+  {k: 'TRIGGER', v: '-PT30M'},
+  {k: 'REPEAT', v: '1'},
+  {k: 'DURATION', v: 'PT15M'},
+  {k: 'DESCRIPTION', v: 'FB Event Alert'},
+  {k: 'ACTION', v: 'DISPLAY'},
+  {k: 'END', v: 'VALARM'}
+]
+
 /**
+ * https://tools.ietf.org/html/rfc5545
+ * 
  * @param {string} icsCalendarUrl
  * @returns {buffer}
  */
@@ -29,13 +41,9 @@ module.exports = async (icsCalendarUrl = '') => {
   const calendar = await parseIcsData(icsData)
 
   calendar.subComponents.forEach((event) => {
-    event.addRawField('BEGIN', 'VALARM')
-    event.addRawField('TRIGGER', '-PT1H')
-    event.addRawField('REPEAT', '1')
-    event.addRawField('DURATION', '-PT15M')
-    event.addRawField('DESCRIPTION', 'FB Event alert')
-    event.addRawField('ACTION', 'DISPLAY')
-    event.addRawField('END', 'VALARM')
+    VALARM.forEach(({k, v} = field) => {
+      event.addRawField(k, v)
+    })
   })
 
   return new Buffer(calendar.toString(), {
