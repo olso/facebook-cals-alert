@@ -48,7 +48,7 @@ function buildCalendar(originalCalendar) {
   for (const originalEvent of originalCalendar.subComponents) {
     // ... doesn't work
     const url = originalEvent.getTextFieldValue('URL') || ''
-    originalEvent.model.description = `${url}\n${originalEvent.model.description}`
+    originalEvent.model.description = `${url}\n\n${originalEvent.model.description}`
     const event = new VEvent(originalEvent.model)
     const eventWithAlarm = decorateEventWithAlarm(event)
     calendar.add(eventWithAlarm)
