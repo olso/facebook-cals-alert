@@ -1,4 +1,4 @@
-const { ICalParser } = require('cozy-ical')
+const { ICalParser, VCalendar, VEvent } = require('cozy-ical')
 const nodeFetch = require('node-fetch')
 const uuid = require('uuid/v4')
 
@@ -20,18 +20,41 @@ async function fetch(url) {
   return nodeFetch(url).then(res => res.text())
 }
 
-function getVALARM(id) {
-  return [
+function decorateEventWithAlarm(event) {
+  const uid = event.getTextFieldValue('UID') || uuid()
+
+  const alarmFields = [
     {k: 'BEGIN', v: 'VALARM'},
     {k: 'TRIGGER', v: '-PT30M'},
     {k: 'REPEAT', v: '1'},
     {k: 'DURATION', v: 'PT15M'},
-    {k: 'DESCRIPTION', v: 'FB Event Alert'},
+    {k: 'DESCRIPTION', v: event.model.summary},
     {k: 'ACTION', v: 'DISPLAY'},
-    {k: 'UID', v: id},
-    {k: 'X-WR-ALARMUID', v: id},
+    {k: 'UID', v: uid},
+    {k: 'X-WR-ALARMUID', v: uid},
     {k: 'END', v: 'VALARM'}
   ]
+
+  for (const { k, v } of alarmFields) {
+    event.addRawField(k, v)
+  }
+
+  return event
+}
+
+function buildCalendar(originalCalendar) {
+  const calendar = new VCalendar(originalCalendar.model)
+
+  for (const originalEvent of originalCalendar.subComponents) {
+    // ... doesn't work
+    const url = originalEvent.getTextFieldValue('URL') || ''
+    originalEvent.model.description = `${url}\n${originalEvent.model.description}`
+    const event = new VEvent(originalEvent.model)
+    const eventWithAlarm = decorateEventWithAlarm(event)
+    calendar.add(eventWithAlarm)
+  }
+
+  return calendar.toString()
 }
 
 /**
@@ -44,19 +67,7 @@ module.exports = async (icsCalendarUrl = '') => {
   const icsData = await fetch(icsCalendarUrl)
   const calendar = await parseIcsData(icsData)
 
-  for (const event of calendar.subComponents) {
-    const description = event.getTextFieldValue('DESCRIPTION')
-    const url = event.getTextFieldValue('URL') || ''
-    const uid = event.getTextFieldValue('UID') || uuid()
-    event.addTextField('DESCRIPTION', `${url}\n${description}`)
-
-    const valarm = getVALARM(uid)
-    for (const { k, v } of valarm) {
-      event.addRawField(k, v)
-    }
-  }
-
-  return new Buffer(calendar.toString(), {
+  return new Buffer(buildCalendar(calendar), {
     'Content-Type': 'text/calendar; charset=utf-8'
   })
 }
