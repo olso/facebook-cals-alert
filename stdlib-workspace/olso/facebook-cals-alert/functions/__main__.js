@@ -20,9 +20,7 @@ async function fetch(url) {
   return nodeFetch(url).then(res => res.text())
 }
 
-function getVALARM() {
-  const id = uuid()
-
+function getVALARM(id) {
   return [
     {k: 'BEGIN', v: 'VALARM'},
     {k: 'TRIGGER', v: '-PT30M'},
@@ -43,17 +41,22 @@ function getVALARM() {
  * @returns {buffer}
  */
 module.exports = async (icsCalendarUrl = '') => {
-
   const icsData = await fetch(icsCalendarUrl)
   const calendar = await parseIcsData(icsData)
 
-  calendar.subComponents.forEach((event) => {
-    getVALARM().forEach(({k, v} = field) => {
+  for (const event of calendar.subComponents) {
+    const description = event.getTextFieldValue('DESCRIPTION')
+    const url = event.getTextFieldValue('URL') || ''
+    const uid = event.getTextFieldValue('UID') || uuid()
+    event.addTextField('DESCRIPTION', `${url}\n${description}`)
+
+    const valarm = getVALARM(uid)
+    for (const { k, v } of valarm) {
       event.addRawField(k, v)
-    })
-  })
+    }
+  }
 
   return new Buffer(calendar.toString(), {
     'Content-Type': 'text/calendar; charset=utf-8'
   })
-};
+}
